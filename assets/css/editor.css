@@ -1,0 +1,91 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background: #002b36;
+	color: #586e75;
+	font-family: 'Monaco', courier, monospace;
+	font-size: 14px;
+}
+
+html,
+body,
+form {
+	height: 100%;
+	width: 100%;
+}
+
+::selection {
+	background: #586e75;
+}
+
+::-moz-selection {
+	background: #586e75;
+}
+
+a {
+	color: #2aa198;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #586e75;
+}
+
+form,
+form textarea {
+	color: inherit;
+	border: none;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.editor,
+form textarea {
+	background: none;
+	resize: none;
+	outline: none;
+	padding: 40px 80px;
+	width: calc(100% - 160px);
+	min-height: calc(100% - 80px);
+	tab-size: 4;
+	margin: 0;
+}
+
+aside {
+	font-family: sans-serif;
+	position: fixed;
+	top: 40px;
+	right: 80px;
+	font-size: 12px;
+}
+
+aside a,
+aside input,
+aside label {
+	text-decoration: none;
+	padding: 10px;
+	margin-left: 5px;
+	border: 0;
+	background: rgba(0, 0, 0, .25);
+	font-size: 14px;
+	color: inherit;
+	cursor: pointer;
+}
+
+aside a:hover,
+aside input:hover,
+aside label:hover,
+aside input[type="checkbox"]:checked + label {
+	color: #2aa198;
+}
+
+aside input[type="checkbox"] {
+	display: none;
+}
+
+aside input[name="brobdingnagian"] {
+	display: none;
+}
