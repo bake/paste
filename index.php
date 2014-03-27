@@ -70,7 +70,7 @@ Bob::get('/recent', function() {
 });
 
 Bob::post('/add', function() {
-	if(isset($_POST['brobdingnagian']))
+	if(isset($_POST['brobdingnagian']) and $_POST['brobdingnagian'] == '')
 		if($token = Paste::save($_POST['text'], $_POST['parent'], $_POST['hidden']))
 			header('location: '.Config::path('base').'/'.$token);
 		else header('location: '.Config::path('base').'/');
