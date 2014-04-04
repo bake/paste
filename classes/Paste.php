@@ -1,8 +1,11 @@
 <?php
 class Paste {
 	public static function get($token) {
-		$result = Config::$db->query('SELECT `date`, `token`, `hidden`, `parent`, `file` FROM `paste_dev` WHERE `token` = "'.$token.'"');
-		$paste  = $result->fetch_assoc();
+		if(!$result = Config::$db->query('SELECT `date`, `token`, `hidden`, `parent`, `file` FROM `'.Config::$table.'` WHERE `token` = :token'))
+			return false;
+
+		$result->execute([':token' => $token]);
+		$paste = $result->fetch(PDO::FETCH_ASSOC);
 
 		if($paste != null)
 			if(file_exists(Config::path('pastes').$paste['file'].'.txt'))
@@ -12,10 +15,13 @@ class Paste {
 	}
 
 	public static function get_num($num) {
-		$result = Config::$db->query('SELECT `date`, `token`, `parent`, `file` FROM `paste_dev` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT '.$num);
+		if(!$result = Config::$db->prepare('SELECT `date`, `token`, `parent`, `file` FROM `'.Config::$table.'` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT :num'))
+			return [];
+
+		$result->execute([':num' => $num]);
 		$pastes = [];
 
-		while($paste = $result->fetch_assoc())
+		while($paste = $result->fetch(PDO::FETCH_ASSOC))
 			if(file_exists(Config::path('pastes').$paste['file'].'.txt'))
 				$pastes[] = $paste;
 
@@ -30,7 +36,7 @@ class Paste {
 		if(trim($text) == false)
 			return false;
 
-		$date   = ($date) ? date('c', $date) : date('c');
+		$date   = date('c');
 		$parent = (paste($parent)) ? $parent : '';
 		$key    = static::generate_key();
 		$file   = static::generate_key();
@@ -44,9 +50,10 @@ class Paste {
 			if(md5($text) == md5(static::get_text($parent_arr['file'])))
 				return $parent_arr['token'];
 
-		if(Config::$db->query('INSERT INTO `paste_dev` (`date`, `token`, `key`, `parent`, `hidden`, `file`) VALUES("'.$date.'", "'.$token.'", "'.$key.'", "'.$parent.'", "'.$hidden.'", "'.$file.'")'))
-			if($put = file_put_contents(Config::path('pastes').$file.'.txt', $text))
-				return $token;
+		if($result = Config::$db->prepare('INSERT INTO `'.Config::$table.'` (`date`, `token`, `key`, `parent`, `hidden`, `file`) VALUES(:date, :token, :key, :parent, :hidden, :file)'))
+			if($res = $result->execute([':date' => $date, ':token' => $token, ':key' => $key, ':parent' => $parent, ':hidden' => $hidden, ':file' => $file]))
+				if($put = file_put_contents(Config::path('pastes').$file.'.txt', $text))
+					return $token;
 
 		return false;
 	}
@@ -55,9 +62,10 @@ class Paste {
 		if(!$paste = static::get($token))
 			return false;
 
-		if($result = Config::$db->query('DELETE FROM `paste_dev` WHERE `token` = "'.$token.'" AND `key` = "'.$key.'";'))
-			if(Config::$db->affected_rows == 1 and unlink(Config::path('pastes').$paste['file'].'.txt'))
-				return true;
+		if($result = Config::$db->query('DELETE FROM `'.Config::$table.'` WHERE `token` = :token AND `key` = :key'))
+			if($result->execute([':token' => $token, ':key' => $key]))
+				if($result->rowCount == 1 and unlink(Config::path('pastes').$paste['file'].'.txt'))
+					return true;
 
 		return false;
 	}

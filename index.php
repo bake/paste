@@ -5,7 +5,7 @@ spl_autoload_register(function($class) {
 	include('./classes/'.$class.'.php');
 });
 
-Config::mysqli_connect();
+Config::sql_connect();
 
 /**
  * welcome
@@ -71,8 +71,10 @@ Bob::get('/recent', function() {
 
 Bob::post('/add', function() {
 	if(isset($_POST['brobdingnagian']) and $_POST['brobdingnagian'] == '')
-		if($token = Paste::save($_POST['text'], $_POST['parent'], $_POST['hidden']))
-			header('location: '.Config::path('base').'/'.$token);
+		if(isset($_POST['text']) and !empty($_POST['text']))
+			if($token = Paste::save($_POST['text'], (isset($_POST['parent'])) ? $_POST['parent'] : '', (isset($_POST['hidden'])) ? $_POST['hidden'] : ''))
+				header('location: '.Config::path('base').'/'.$token);
+			else header('location: '.Config::path('base').'/');
 		else header('location: '.Config::path('base').'/');
 	else header('location: '.Config::path('base').'/');
 
