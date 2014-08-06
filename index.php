@@ -1,11 +1,27 @@
 <?php
+if(false and isset($_GET['dev'])) {
+	error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+}
 ini_set('default_charset', 'utf-8');
 
-spl_autoload_register(function($class) {
+$dev = false;
+
+spl_autoload_register(function ($class) {
 	include('./classes/'.$class.'.php');
 });
 
-Config::sql_connect();
+Config::mysqli_connect();
+
+/**
+ * bob patters
+ */
+Bob::$patterns = [
+	'numdotjson'   => '[0-9]+\.json',
+	'paste'        => '[a-zA-Z0-9].{11}',
+	'pastedotjson' => '[a-zA-Z0-9].{11}\.json',
+	'pastedottxt'  => '[a-zA-Z0-9].{11}\.txt'
+];
 
 /**
  * welcome
@@ -22,7 +38,7 @@ Bob::get('/', function() {
  */
 
 Bob::get('/help', function() {
-	header('location: '.Config::path('base').'/svwiujlxh5kf');
+	header('location: '.Config::path('base').'/k87iojv4g6pa');
 	exit();
 });
 
@@ -71,10 +87,8 @@ Bob::get('/recent', function() {
 
 Bob::post('/add', function() {
 	if(isset($_POST['brobdingnagian']) and $_POST['brobdingnagian'] == '')
-		if(isset($_POST['text']) and !empty($_POST['text']))
-			if($token = Paste::save($_POST['text'], (isset($_POST['parent'])) ? $_POST['parent'] : '', (isset($_POST['hidden'])) ? $_POST['hidden'] : ''))
-				header('location: '.Config::path('base').'/'.$token);
-			else header('location: '.Config::path('base').'/');
+		if($token = Paste::save($_POST['text'], $_POST['parent'], $_POST['hidden']))
+			header('location: '.Config::path('base').'/'.$token);
 		else header('location: '.Config::path('base').'/');
 	else header('location: '.Config::path('base').'/');
 
@@ -85,12 +99,14 @@ Bob::post('/add', function() {
  * api
  */
 
+// legacy
 Bob::get('/raw/:paste', function($paste) {
 	if($paste = Paste::get($paste))
 		View::add('raw', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
 	else header('Status: 404 Not Found');
 });
 
+// legacy
 Bob::get('/info/:paste', function($paste) {
 	header('Content-type: application/json');
 
@@ -99,8 +115,38 @@ Bob::get('/info/:paste', function($paste) {
 	else header('Status: 404 Not Found');
 });
 
+//legacy
 Bob::get('/recent/:is_numeric', function($num) {
 	header('Content-type: application/json');
+
+	if($num <= 100) {
+		$pasts = [];
+
+		foreach(Paste::get_num($num) as $paste)
+			$pasts[] = get_paste($paste['token']);
+
+		echo json_encode($pasts);
+	} else header('Status: 404 Not Found');
+});
+
+Bob::get('/:pastedottxt', function($paste) {
+	if($paste = Paste::get(remext($paste)))
+		View::add('raw', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
+	else header('Status: 404 Not Found');
+});
+
+Bob::get('/:pastedotjson', function($paste) {
+	header('Content-type: application/json');
+
+	if($paste = get_paste(remext($paste)))
+		echo json_encode($paste);
+	else header('Status: 404 Not Found');
+});
+
+Bob::get('/recent/:numdotjson', function($num) {
+	header('Content-type: application/json');
+
+	$num = remext($num);
 
 	if($num <= 100) {
 		$pasts = [];
@@ -150,10 +196,6 @@ function get_paste($token) {
 	} else return false;
 }
 
-/**
- * custom selectorzZ
- */
-
-function paste($paste) {
-	return preg_match('/^[a-z0-9].{11}$/i', $paste) or is_numeric($paste);
+function remext($file) {
+	return str_replace(strrchr($file, '.'), '', $file);
 }
