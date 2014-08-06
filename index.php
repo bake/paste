@@ -1,11 +1,5 @@
 <?php
-if(false and isset($_GET['dev'])) {
-	error_reporting(E_ALL);
-	ini_set('display_errors', 1);
-}
 ini_set('default_charset', 'utf-8');
-
-$dev = false;
 
 spl_autoload_register(function ($class) {
 	include('./classes/'.$class.'.php');
@@ -98,36 +92,6 @@ Bob::post('/add', function() {
 /**
  * api
  */
-
-// legacy
-Bob::get('/raw/:paste', function($paste) {
-	if($paste = Paste::get($paste))
-		View::add('raw', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
-	else header('Status: 404 Not Found');
-});
-
-// legacy
-Bob::get('/info/:paste', function($paste) {
-	header('Content-type: application/json');
-
-	if($paste = get_paste($paste))
-		echo json_encode($paste);
-	else header('Status: 404 Not Found');
-});
-
-//legacy
-Bob::get('/recent/:is_numeric', function($num) {
-	header('Content-type: application/json');
-
-	if($num <= 100) {
-		$pasts = [];
-
-		foreach(Paste::get_num($num) as $paste)
-			$pasts[] = get_paste($paste['token']);
-
-		echo json_encode($pasts);
-	} else header('Status: 404 Not Found');
-});
 
 Bob::get('/:pastedottxt', function($paste) {
 	if($paste = Paste::get(remext($paste)))
