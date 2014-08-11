@@ -37,7 +37,7 @@ class Paste {
 			return false;
 
 		$date   = date('c');
-		$parent = (paste($parent)) ? $parent : '';
+		$parent = (preg_match('#^'.Bob::$patterns['paste'].'$#', $value) == 1) ? $parent : '';
 		$key    = static::generate_key();
 		$file   = static::generate_key();
 		$hidden = ($hidden) ? 'true' : 'false';
