@@ -31,11 +31,12 @@ class Config {
 	public static function sql_connect() {
 		if(!empty(static::$sqlite))
 			static::$db = new PDO('sqlite:'.static::$sqlite);
-		else static::$db = new PDO('mysql:host='.static::$mysql['host'].';dbname='.static::$mysql['db'], static::$mysql['user'], static::$mysql['pass']);
+		else
+            static::$db = new PDO('mysql:host='.static::$mysql['host'].';dbname='.static::$mysql['db'], static::$mysql['user'], static::$mysql['pass']);
 
-		$results = static::$db->query('SHOW TABLES LIKE `'.static::$table.'`');
+		$results = static::$db->query('SHOW TABLES LIKE \''.static::$table.'\'');
 
-		if(!$results or $results->rowCount() > 0)
+		if(!$results or $results->rowCount() == 0)
 			static::initialize();
 	}
 
