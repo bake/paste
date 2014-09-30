@@ -8,7 +8,7 @@ class Paste {
 		$paste = $result->fetch(PDO::FETCH_ASSOC);
 
 		if($paste != null)
-			if(file_exists(Config::path('pastes').$paste['file'].'.txt'))
+			if(file_exists(static::get_filename($paste['file'])))
 				return $paste;
 			else return false;
 		else return false;
@@ -22,15 +22,32 @@ class Paste {
 		$pastes = [];
 
 		while($paste = $result->fetch(PDO::FETCH_ASSOC))
-			if(file_exists(Config::path('pastes').$paste['file'].'.txt'))
+			if(file_exists(static::get_filename($paste['file'])))
 				$pastes[] = $paste;
 
 		return $pastes;
 	}
 
 	public static function get_text($file) {
-		return file_get_contents(Config::path('pastes').$file.'.txt');
+		return file_get_contents(static::get_filename($file));
 	}
+
+    public static function get_filename($file, $new_paste = false, $folder_only = false) {
+        $folder = Config::path('pastes') . substr($file, 0, 2) . '/' . substr($file, 2, 2) . '/';
+        $fname  = $folder . $file . '.txt';
+        if ($new_paste === true)
+            return $fname;
+
+        if ($folder_only === true)
+            return $folder;
+
+        if (file_exists($fname))
+            return $fname;
+        elseif (file_exists(Config::path('pastes').$file.'.txt'))
+            return Config::path('pastes').$file.'.txt';
+        else
+            return false;
+    }
 
 	public static function save($text, $parent = '', $hidden = false) {
 		if(trim($text) == false)
@@ -52,7 +69,9 @@ class Paste {
 
 		if($result = Config::$db->prepare('INSERT INTO `'.Config::$table.'` (`date`, `token`, `key`, `parent`, `hidden`, `file`) VALUES(:date, :token, :key, :parent, :hidden, :file)'))
 			if($res = $result->execute([':date' => $date, ':token' => $token, ':key' => $key, ':parent' => $parent, ':hidden' => $hidden, ':file' => $file]))
-				if($put = file_put_contents(Config::path('pastes').$file.'.txt', $text))
+                if(!file_exists(static::get_filename($file, false, true)))
+                    mkdir(static::get_filename($file, false, true), 0700, true);
+				if($put = file_put_contents(static::get_filename($file, true), $text))
 					return $token;
 
 		return false;
@@ -64,7 +83,7 @@ class Paste {
 
 		if($result = Config::$db->query('DELETE FROM `'.Config::$table.'` WHERE `token` = :token AND `key` = :key'))
 			if($result->execute([':token' => $token, ':key' => $key]))
-				if($result->rowCount == 1 and unlink(Config::path('pastes').$paste['file'].'.txt'))
+				if($result->rowCount == 1 and unlink(static::get_filename($paste['file'])))
 					return true;
 
 		return false;
