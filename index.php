@@ -5,7 +5,7 @@ spl_autoload_register(function ($class) {
 	include('./classes/'.$class.'.php');
 });
 
-Config::mysqli_connect();
+Config::sql_connect();
 
 /**
  * bob patters
@@ -32,7 +32,7 @@ Bob::get('/', function() {
  */
 
 Bob::get('/help', function() {
-	header('location: '.Config::path('base').'/k87iojv4g6pa');
+	header('location: '.Config::path('base') . Config::path('help'));
 	exit();
 });
 

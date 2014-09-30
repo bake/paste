@@ -1,7 +1,7 @@
 <?php
 class Paste {
 	public static function get($token) {
-		if(!$result = Config::$db->query('SELECT `date`, `token`, `hidden`, `parent`, `file` FROM `'.Config::$table.'` WHERE `token` = :token'))
+		if(!$result = Config::$db->prepare('SELECT `date`, `token`, `hidden`, `parent`, `file` FROM `'.Config::$table.'` WHERE `token` = :token'))
 			return false;
 
 		$result->execute([':token' => $token]);
@@ -15,7 +15,7 @@ class Paste {
 	}
 
 	public static function get_num($num) {
-		if(!$result = Config::$db->prepare('SELECT `date`, `token`, `parent`, `file` FROM `'.Config::$table.'` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT :num'))
+		if(!$result = Config::$db->prepare(sprintf('SELECT `date`, `token`, `parent`, `file` FROM `'.Config::$table.'` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT %d', $num)))
 			return [];
 
 		$result->execute([':num' => $num]);
