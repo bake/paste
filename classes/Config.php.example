@@ -25,6 +25,8 @@ class Config {
 
 	public static $db;
 
+    public static $site_name = 'Someones Paste';
+
 	public static function path($path) {
 		return static::$paths[$path];
 	}
