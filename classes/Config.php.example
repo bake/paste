@@ -6,7 +6,8 @@ class Config {
 		'index'  => '/index.php',
 		'views'  => 'views/',
 		'assets' => '/assets/',
-		'pastes' => '/var/www/paste/pastes/'
+		'pastes' => '/var/www/paste/pastes/',
+		'help'   => '/k87iojv4g6pa',
 	];
 
 	public static $mysql = [
@@ -24,6 +25,8 @@ class Config {
 
 	public static $db;
 
+    public static $site_name = 'Someones Paste';
+
 	public static function path($path) {
 		return static::$paths[$path];
 	}
@@ -31,11 +34,12 @@ class Config {
 	public static function sql_connect() {
 		if(!empty(static::$sqlite))
 			static::$db = new PDO('sqlite:'.static::$sqlite);
-		else static::$db = new PDO('mysql:host='.static::$mysql['host'].';dbname='.static::$mysql['db'], static::$mysql['user'], static::$mysql['pass']);
+		else
+            static::$db = new PDO('mysql:host='.static::$mysql['host'].';dbname='.static::$mysql['db'], static::$mysql['user'], static::$mysql['pass']);
 
-		$results = static::$db->query('SHOW TABLES LIKE `'.static::$table.'`');
+		$results = static::$db->query('SHOW TABLES LIKE \''.static::$table.'\'');
 
-		if(!$results or $results->rowCount() > 0)
+		if(!$results or $results->rowCount() == 0)
 			static::initialize();
 	}
 
