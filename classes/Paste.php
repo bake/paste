@@ -15,7 +15,7 @@ class Paste {
 	}
 
 	public static function get_num($num) {
-		if(!$result = Config::$db->prepare(sprintf('SELECT `date`, `token`, `parent`, `file` FROM `'.Config::$table.'` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT %d', $num)))
+		if(!$result = Config::$db->prepare('SELECT `date`, `token`, `parent`, `file` FROM `'.Config::$table.'` WHERE `hidden` = "false" ORDER BY `id` DESC LIMIT :num'))
 			return [];
 
 		$result->execute([':num' => $num]);
