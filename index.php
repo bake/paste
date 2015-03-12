@@ -37,11 +37,13 @@ Bob::get('/help', function() {
 });
 
 Bob::get('/:paste', function($paste) {
-	View::add('header');
-
-	if($paste = Paste::get($paste))
+	if($paste = Paste::get($paste)) {
+		View::add('header', ['paste' => $paste]);
 		View::add('paste', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
-	else View::add('error', ['code' => 404]);
+	} else {
+		View::add('header');
+		View::add('error', ['code' => 404]);
+	}
 
 	View::add('footer');
 });
