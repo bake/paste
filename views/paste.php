@@ -9,5 +9,5 @@
 			<a href="<?= $paste['json']; ?>">JSON</a>
 			<a href="<?= Config::path('base'); ?>/fork/<?= $paste['token']; ?>">Fork</a>
 			<a href="<?= Config::path('base'); ?>/help">?</a>
-			<a href="<?php echo Config::path('url').Config::path('base'); ?>">&#8962;</a>
+			<a href="<?= Config::path('url').Config::path('base'); ?>">&#8962;</a>
 		</aside>
