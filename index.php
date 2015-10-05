@@ -39,7 +39,7 @@ Bob::get('/help', function() {
 Bob::get('/:paste', function($paste) {
 	if($paste = get_paste($paste, true)) {
 		View::add('header', ['paste' => $paste]);
-		View::add('paste', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
+		View::add('paste', ['paste' => $paste]);
 	} else {
 		View::add('header');
 		View::add('error', ['code' => 404]);
@@ -52,7 +52,7 @@ Bob::get('/fork/:paste', function($paste) {
 	View::add('header');
 
 	if($paste = get_paste($paste, true))
-		View::add('fork', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
+		View::add('fork', ['paste' => $paste]);
 	else View::add('error', ['code' => 404]);
 
 	View::add('footer');
@@ -72,9 +72,6 @@ Bob::get('/recent', function() {
 	View::add('header');
 
 	$pastes = Paste::get_num(20);
-
-	#foreach($pastes as $i => $paste)
-	#	$pastes[$i] = array_merge($paste, ['text' => Paste::get_text($paste['file'])]);
 
 	View::add('recent', ['pastes' => $pastes]);
 
@@ -97,7 +94,7 @@ Bob::post('/add', function() {
 
 Bob::get('/:pastedottxt', function($paste) {
 	if($paste = get_paste(remext($paste), true))
-		View::add('raw', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
+		View::add('raw', ['paste' => $paste]);
 	else header('Status: 404 Not Found');
 });
 
@@ -144,13 +141,12 @@ Bob::notfound(function() {
  * receive paste and parents
  */
 
-function get_paste($token, $private = false) {
+function get_paste($token, $text = false) {
 	if($paste = Paste::get($token)) {
 		$data = [
 			'date'   => $paste['date'],
 			'token'  => $paste['token'],
 			'hidden' => ($paste['hidden'] == 'true'),
-			'file'   => $paste['file'],
 			'url'    => Config::path('url').Config::path('base').'/'.$paste['token'],
 			'raw'    => Config::path('url').Config::path('base').'/'.$paste['token'].'.txt',
 			'json'   => Config::path('url').Config::path('base').'/'.$paste['token'].'.json',
@@ -160,8 +156,8 @@ function get_paste($token, $private = false) {
 		if($paste['parent'] != '' and $parent = get_paste($paste['parent'], $private))
 			$data['parent'] = $parent;
 
-		if(!$private)
-			unset($data['file']);
+		if($text)
+			$data['text'] = Paste::get_text($paste['file']);
 
 		return $data;
 	} else return false;
