@@ -33,20 +33,20 @@ class Paste {
 	}
 
 	public static function get_filename($file, $new_paste = false, $folder_only = false) {
-		$folder = Config::path('pastes') . substr($file, 0, 2) . '/' . substr($file, 2, 2) . '/';
-		$fname  = $folder . $file . '.txt';
-		if ($new_paste === true)
+		$folder = Config::path('pastes').substr($file, 0, 2).'/'.substr($file, 2, 2).'/';
+		$fname  = $folder.$file.'.txt';
+
+		if($new_paste === true)
 			return $fname;
 
-		if ($folder_only === true)
+		if($folder_only === true)
 			return $folder;
 
-		if (file_exists($fname))
+		if(file_exists($fname))
 			return $fname;
-		elseif (file_exists(Config::path('pastes').$file.'.txt'))
+		elseif(file_exists(Config::path('pastes').$file.'.txt'))
 			return Config::path('pastes').$file.'.txt';
-		else
-			return false;
+		else return false;
 	}
 
 	public static function save($text, $parent = '', $hidden = false) {
@@ -59,9 +59,8 @@ class Paste {
 		$file   = static::generate_key();
 		$hidden = ($hidden) ? 'true' : 'false';
 
-		do {
-			$token = static::generate_key();
-		} while(static::get($token));
+		do $token = static::generate_key();
+		while(static::get($token));
 
 		if($parent != '' and $parent_arr = static::get($parent))
 			if(md5($text) == md5(static::get_text($parent_arr['file'])))
