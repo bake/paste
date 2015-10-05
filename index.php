@@ -12,9 +12,9 @@ Config::sql_connect();
  */
 Bob::$patterns = [
 	'numdotjson'   => '[0-9]+\.json',
-	'paste'        => '[a-zA-Z0-9].{11}',
-	'pastedotjson' => '[a-zA-Z0-9].{11}\.json',
-	'pastedottxt'  => '[a-zA-Z0-9].{11}\.txt'
+	'paste'        => '[a-zA-Z0-9]{12}',
+	'pastedotjson' => '[a-zA-Z0-9]{12}\.json',
+	'pastedottxt'  => '[a-zA-Z0-9]{12}\.txt'
 ];
 
 /**
@@ -32,12 +32,12 @@ Bob::get('/', function() {
  */
 
 Bob::get('/help', function() {
-	header('location: '.Config::path('base') . Config::path('help'));
+	header('location: '.Config::path('base').Config::path('help'));
 	exit();
 });
 
 Bob::get('/:paste', function($paste) {
-	if($paste = Paste::get($paste)) {
+	if($paste = get_paste($paste, true)) {
 		View::add('header', ['paste' => $paste]);
 		View::add('paste', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
 	} else {
@@ -51,7 +51,7 @@ Bob::get('/:paste', function($paste) {
 Bob::get('/fork/:paste', function($paste) {
 	View::add('header');
 
-	if($paste = Paste::get($paste))
+	if($paste = get_paste($paste, true))
 		View::add('fork', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
 	else View::add('error', ['code' => 404]);
 
@@ -96,7 +96,7 @@ Bob::post('/add', function() {
  */
 
 Bob::get('/:pastedottxt', function($paste) {
-	if($paste = Paste::get(remext($paste)))
+	if($paste = get_paste(remext($paste), true))
 		View::add('raw', ['paste' => array_merge($paste, ['text' => Paste::get_text($paste['file'])])]);
 	else header('Status: 404 Not Found');
 });
@@ -144,19 +144,24 @@ Bob::notfound(function() {
  * receive paste and parents
  */
 
-function get_paste($token) {
+function get_paste($token, $private = false) {
 	if($paste = Paste::get($token)) {
 		$data = [
 			'date'   => $paste['date'],
 			'token'  => $paste['token'],
 			'hidden' => ($paste['hidden'] == 'true'),
+			'file'   => $paste['file'],
 			'url'    => Config::path('url').Config::path('base').'/'.$paste['token'],
-			'raw'    => Config::path('url').Config::path('base').'/raw/'.$paste['token'],
-			'json'   => Config::path('url').Config::path('base').'/info/'.$paste['token']
+			'raw'    => Config::path('url').Config::path('base').'/'.$paste['token'].'.txt',
+			'json'   => Config::path('url').Config::path('base').'/'.$paste['token'].'.json',
+			'fork'   => Config::path('url').Config::path('base').'/fork/'.$paste['token']
 		];
 
-		if($paste['parent'] != '' and $parent = get_paste($paste['parent']))
+		if($paste['parent'] != '' and $parent = get_paste($paste['parent'], $private))
 			$data['parent'] = $parent;
+
+		if(!$private)
+			unset($data['file']);
 
 		return $data;
 	} else return false;
