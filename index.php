@@ -153,7 +153,7 @@ function get_paste($token, $text = false) {
 			'fork'   => Config::path('url').Config::path('base').'/fork/'.$paste['token']
 		];
 
-		if($paste['parent'] != '' and $parent = get_paste($paste['parent'], $private))
+		if($paste['parent'] != '' and $parent = get_paste($paste['parent'], $text))
 			$data['parent'] = $parent;
 
 		if($text)
