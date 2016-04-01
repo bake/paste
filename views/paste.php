@@ -6,6 +6,7 @@
 			<a href="<?= $paste['parent']['url']; ?>">Parent</a>
 <?php endif; ?>
 			<a href="<?= $paste['raw']; ?>">Raw</a>
+			<a href="<?= $paste['md']; ?>">Markdown</a>
 			<a href="<?= $paste['json']; ?>">JSON</a>
 			<a href="<?= Config::path('base'); ?>/fork/<?= $paste['token']; ?>">Fork</a>
 			<a href="<?= Config::path('base'); ?>/help">?</a>
