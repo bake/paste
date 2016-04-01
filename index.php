@@ -1,4 +1,11 @@
 <?php
+error_reporting(E_ALL);
+
+// Melde alle PHP Fehler
+error_reporting(-1);
+
+// Dies entspricht error_reporting(E_ALL);
+ini_set('error_reporting', E_ALL);
 ini_set('default_charset', 'utf-8');
 
 spl_autoload_register(function ($class) {
@@ -14,6 +21,7 @@ Bob::$patterns = [
 	'numdotjson'   => '[0-9]+\.json',
 	'paste'        => '[a-zA-Z0-9]{12}',
 	'pastedotjson' => '[a-zA-Z0-9]{12}\.json',
+	'pastedotmd'   => '[a-zA-Z0-9]{12}\.md',
 	'pastedottxt'  => '[a-zA-Z0-9]{12}\.txt'
 ];
 
@@ -88,6 +96,12 @@ Bob::post('/add', function() {
 	exit();
 });
 
+Bob::get('/:pastedotmd', function($paste) {
+	if($paste = get_paste(remext($paste), true))
+		echo Parsedown::instance()->text($paste['text']);
+	else header('location: '.Config::path('base').'/');
+});
+
 /**
  * api
  */
@@ -149,6 +163,7 @@ function get_paste($token, $text = false) {
 			'hidden' => ($paste['hidden'] == 'true'),
 			'url'    => Config::path('url').Config::path('base').'/'.$paste['token'],
 			'raw'    => Config::path('url').Config::path('base').'/'.$paste['token'].'.txt',
+			'md'     => Config::path('url').Config::path('base').'/'.$paste['token'].'.md',
 			'json'   => Config::path('url').Config::path('base').'/'.$paste['token'].'.json',
 			'fork'   => Config::path('url').Config::path('base').'/fork/'.$paste['token']
 		];
